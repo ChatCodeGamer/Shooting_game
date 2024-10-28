@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooting Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1c1c1c;
+            color: white;
+            overflow: hidden;
+        }
+        #game-container {
+            display: none;
+            text-align: center;
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: #333;
+        }
+        #main-menu, #shop, #rules {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .normal {
+            background-color: red;
+        }
+        .gold {
+            background-color: gold;
+        }
+        .grey {
+            background-color: grey;
+        }
+        .blue {
+            background-color: blue;
+        }
+        .buy-coffee {
+            background-color: yellow;
+            color: black;
+        }
+		 }
+        .update-log {
+            background-color: green;
+            color: white;
+        }
+        .update-message {
+            font-style: italic;
+            color: lightgrey;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-menu">
+        <h1>Welcome to Shooting Game</h1>
+		<h3>Shoot Tragets with a single click!</h3>
+		<h5>By ChatCodeGamer</h5>
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="openShop()">Go to Shop</button>
+        <button onclick="showRules()">Rules</button>
+        <br>
+        <button class="update-log" onclick="showUpdateLog()">Update Log</button>
+        <div id="update-section" style="display: none;">
+            <div id="update-message" class="update-message">There are no updates yet!</div>
+            <button class="hide-update-log" onclick="hideUpdateLog()">Hide Update Log</button>
+        </div>
+		<br>
+		<h6> Version 1.0 </h6>
+		  <button class="buy-coffee" onclick="window.open('https://buymeacoffee.com/chatcodergames', '_blank')">Buy Me a Coffee</button>
+		</div>
+
+    <div id="game-container">
+        <p id="score">Score: 0</p>
+        <p>Current Gun: <span id="current-gun">Basic Gun</span></p>
+        <button onclick="endGame()">Back to Main Menu</button>
+    </div>
+
+    <div id="shop" style="display: none;">
+        <h1>Shop</h1>
+        <p>Coins: <span id="coins">0</span></p>
+        <button onclick="buyGun('Basic Gun', 0)">Basic Gun - Free</button>
+        <button onclick="buyGun('Pistol', 5)">Pistol - 5 Coins</button>
+        <button onclick="buyGun('Shotgun', 15)">Shotgun - 15 Coins</button>
+        <button onclick="buyGun('AK-47', 30)">AK-47 - 30 Coins</button>
+        <button onclick="buyGun('Cool Gun', 10)">Cool Gun - 10 Coins</button>
+        <button onclick="buyGun('Mega Gun', 20)">Mega Gun - 20 Coins</button>
+        <button onclick="buyGun('Minigun', 50)">Minigun - 50 Coins</button>
+        <br><button onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <div id="rules" style="display: none;">
+        <h1>Game Rules</h1>
+        <p>
+            1. Click on the targets to score points.<br>
+            2. Gold targets earn you double points!<br>
+            3. Grey targets will end the game.<br>
+            4. Blue targets will halve your score.<br>
+            5. At least 5 targets will always be on the screen.<br>
+            6. Targets will change randomly and can be challenging to hit.<br>
+            7. Earn coins to buy better guns in the shop.<br>
+            8. Targets may spawn over the "Back to Main Menu" button. Unless you want to end the game, be careful not to click it!<br>
+            9. Have fun and enjoy!
+        </p>
+        <button onclick="backToMenu()">Back to Menu</button>
+    </div>
+
+    <audio id="ding" src="ding.mp3"></audio>
+    <audio id="dingding" src="dingding.mp3"></audio>
+    <audio id="failure" src="failure.mp3"></audio>
+
+    <script>
+        let score = 0;
+        let coins = 0;
+        let gun = 'Basic Gun';
+        const targetsPerGame = 5; // Number of targets to spawn in a game
+        const spawnInterval = 1000; // Interval for target respawn
+
+        function startGame() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('shop').style.display = 'none';
+            document.getElementById('rules').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+
+            score = 0;
+            updateScore();
+            spawnTargets();
+            setInterval(spawnTargets, spawnInterval); // Continuously spawn targets
+        }
+		
+
+
+        function endGame() {
+            alert("Game Over! Final Score: " + score);
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+            clearTargets(); // Clear all targets when the game ends
+        }
+
+        function openShop() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('shop').style.display = 'block';
+        }
+
+        function showRules() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('rules').style.display = 'block';
+        }
+		
+		function showUpdateLog() {
+            const updateSection = document.getElementById('update-section');
+            updateSection.style.display = 'block';
+        }
+
+        function hideUpdateLog() {
+            const updateSection = document.getElementById('update-section');
+            updateSection.style.display = 'none';
+        }
+	
+        function backToMenu() {
+            document.getElementById('shop').style.display = 'none';
+            document.getElementById('rules').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('coins').textContent = coins;
+            document.getElementById('current-gun').textContent = gun;
+        }
+
+        function spawnTargets() {
+            clearTargets(); // Clear existing targets before spawning new ones
+            for (let i = 0; i < targetsPerGame; i++) {
+                createTarget();
+            }
+        }
+
+        function clearTargets() {
+            const targets = document.querySelectorAll('.target');
+            targets.forEach(target => target.remove()); // Remove all targets from the DOM
+        }
+
+        function createTarget() {
+            const target = document.createElement('div');
+            const targetType = Math.random();
+            let isGold = false;
+            let isGrey = false;
+            let isBlue = false;
+
+            if (targetType < 0.03) { // 3% chance for a blue target
+                target.className = 'target blue';
+                isBlue = true;
+            } else if (targetType < 0.20) { // 20% chance for a gold target
+                target.className = 'target gold';
+                isGold = true;
+            } else if (targetType < 0.30) { // 10% chance for a grey target
+                target.className = 'target grey';
+                isGrey = true;
+            } else { // 67% chance for a normal target
+                target.className = 'target normal';
+            }
+
+            target.style.top = `${Math.random() * 350}px`;
+            target.style.left = `${Math.random() * 550}px`;
+
+            target.onclick = () => {
+                if (isGrey) {
+                    document.getElementById('failure').play();
+                    endGame();
+                } else if (isBlue) {
+                    score = Math.floor(score / 2); // Halve the score
+                    updateScore();
+                    alert("You hit a blue target! Your score is halved.");
+                } else {
+                    const points = isGold ? 2 : 1;
+                    score += points;
+                    coins += points;
+                    updateScore();
+                    if (isGold) {
+                        document.getElementById('dingding').play();
+                    } else {
+                        document.getElementById('ding').play();
+                    }
+                }
+                target.remove(); // Target is removed only when clicked
+            };
+
+            document.getElementById('game-container').appendChild(target);
+            moveTarget(target); // Start moving the target
+        }
+
+        function moveTarget(target) {
+            const moveInterval = setInterval(() => {
+                if (target.parentNode) { // Only move if target is still in the DOM
+                    target.style.top = `${Math.random() * 350}px`;
+                    target.style.left = `${Math.random() * 550}px`;
+                } else {
+                    clearInterval(moveInterval);
+                }
+            }, 1000); // Move every second
+        }
+
+        function buyGun(newGun, cost) {
+            if (coins >= cost) {
+                gun = newGun;
+                coins -= cost;
+                updateScore();
+                alert(`You purchased the ${newGun}!`);
+            } else {
+                alert("Not enough coins!");
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
